@@ -1,0 +1,66 @@
+package it.unina.prisonmanager.model;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Objects;
+
+abstract public class Trackable
+{
+	private Instant insertedAt;
+	private Instant updatedAt;
+	
+	public Trackable() {}
+	
+	public Trackable(Instant insertedAt, Instant updatedAt) {
+		setInsertInstant(insertedAt);
+		setUpdateInstant(updatedAt);
+	}
+	
+	public void setUpdateInstant(Instant updatedAt) {
+		requireNonFuture(updatedAt, "Update instant cannot be in the future.");
+		this.updatedAt = truncateToSeconds(updatedAt);
+	}
+	
+	public void setInsertInstant(Instant insertedAt) {
+		Objects.requireNonNull(insertedAt, "Insert instant is NULL.");
+		requireNonFuture(insertedAt, "Insert instant cannot be in the future.");
+		this.insertedAt = truncateToSeconds(insertedAt);
+	}
+	
+	protected static Instant truncateToSeconds(Instant instant) {
+		return (instant == null) ? null : instant.truncatedTo(ChronoUnit.SECONDS);
+	}
+	
+	protected static Instant requireNonFuture(Instant instant) {
+		return requireNonFuture(instant, "Instant cannot be in the future.");
+	}
+	
+	protected static Instant requireNonFuture(Instant instant, String message) {
+		if (instant != null && instant.isAfter(Instant.now())) {
+			throw new IllegalArgumentException(message);
+		} return instant;
+	}
+	
+	public Instant getInsertInstant() {
+		return insertedAt;
+	}
+	
+	public Instant getUpdateInstant() {
+		return updatedAt;
+	}
+	
+	@Override
+	public final String toString() {
+		return getExtensionDetails()
+			+ ", insertionInstant=" + insertedAt
+			+ ", updateInstant=" + updatedAt + "}";
+	}
+	
+	abstract public String getExtensionDetails();
+	
+	@Override
+	abstract public boolean equals(Object obj);
+	
+	@Override
+	abstract public int hashCode();
+}
