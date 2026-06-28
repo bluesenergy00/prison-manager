@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-abstract public class Trackable
+abstract public class Trackable implements Entity
 {
 	private Instant insertedAt;
 	private Instant updatedAt;
@@ -57,10 +57,4 @@ abstract public class Trackable
 	}
 	
 	abstract public String getExtensionDetails();
-	
-	@Override
-	abstract public boolean equals(Object obj);
-	
-	@Override
-	abstract public int hashCode();
 }

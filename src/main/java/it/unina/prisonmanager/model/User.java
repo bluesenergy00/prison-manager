@@ -3,22 +3,20 @@ package it.unina.prisonmanager.model;
 import java.time.Instant;
 import java.util.Objects;
 
-public class FrontendUser extends Trackable
+public class User extends Trackable
 {
+	private static final int USERNAME_MINIMUM_LENGTH = 3;
+	private static final int USERNAME_MAXIMUM_LENGTH = 15;
+	
 	private int id;
 	private String username;
 	private String passwordHash;
 	private UserRole role;
 	private boolean isActive;
 	
-	public static final int USERNAME_MINIMUM_LENGTH = 3;
-	public static final int USERNAME_MAXIMUM_LENGTH = 15;
-	public static final int PASSWORD_MINIMUM_LENGTH = 8;
-	public static final int PASSWORD_MAXIMUM_LENGTH = 120;
+	public User() {}
 	
-	public FrontendUser() {}
-	
-	public FrontendUser(
+	public User(
 		int id, String username, String passwordHash, UserRole role,
 		boolean isActive, Instant insertedAt, Instant updatedAt
 	) {
@@ -53,41 +51,14 @@ public class FrontendUser extends Trackable
 				hasLowerCaseASCII = true;
 			} else if (c < '0' || c > '9') {
 				throw new IllegalArgumentException(
-					"Username can only contain ASCII letters and digits, no spaces."
+					"Username can only contain A-Z letters and digits, no spaces."
 				);
 			}
 		} if (!hasLowerCaseASCII) {
 			throw new IllegalArgumentException(
-				"Username needs to contain at least one ASCII letter."
+				"Username needs to contain at least one A-Z letter."
 			);
 		} return username;
-	}
-	
-	public static String requireValidPassword(String password) {
-		Objects.requireNonNull(password, "Password is NULL.");
-		int i = password.length();
-		if (i < PASSWORD_MINIMUM_LENGTH || i > PASSWORD_MAXIMUM_LENGTH) {
-			throw new IllegalArgumentException(
-				"Password needs to be between " + PASSWORD_MINIMUM_LENGTH
-				+ " and " + PASSWORD_MAXIMUM_LENGTH + " characters long."
-			);
-		} boolean hasLowerCase = false;
-		boolean hasUpperCase = false;
-		boolean hasDigit = false;
-		while ((!hasLowerCase || !hasUpperCase || !hasDigit) && --i >= 0) {
-			char c = password.charAt(i);
-			if (Character.isLowerCase(c)) {
-				hasLowerCase = true;
-			} else if (Character.isUpperCase(c)) {
-				hasUpperCase = true;
-			} else if (c >= '0' && c <= '9') {
-				hasDigit = true;
-			}
-		} if (i < 0) {
-			throw new IllegalArgumentException(
-				"Password needs lower case, upper case and digit characters."
-			);
-		} return password;
 	}
 	
 	public void setUsername(String username) {
@@ -131,7 +102,7 @@ public class FrontendUser extends Trackable
 	
 	@Override
 	public String getExtensionDetails() {
-		return "FrontendUser {id=" + this.id
+		return "User {id=" + this.id
 			+ ", username='" + this.username
 			+ "\', role='" + this.role
 			+ "\', isActive=" + this.isActive;
@@ -143,7 +114,7 @@ public class FrontendUser extends Trackable
 			return true;
 		} if (obj == null || getClass() != obj.getClass()) {
 			return false;
-		} FrontendUser tmp = (FrontendUser) obj;
+		} User tmp = (User) obj;
 		return Objects.equals(this.username, tmp.username);
 	}
 	

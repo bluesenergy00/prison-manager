@@ -1,3 +1,3 @@
 package it.unina.prisonmanager.view;
 
-public interface LoginView extends AuthenticationView {}
+public interface LoginView extends ClosableView, MessageView {}
