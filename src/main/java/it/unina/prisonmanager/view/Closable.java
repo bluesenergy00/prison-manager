@@ -1,6 +1,7 @@
 package it.unina.prisonmanager.view;
 
-public interface ClosableView
+@FunctionalInterface
+public interface Closable
 {
 	void close();
 }

@@ -2,7 +2,9 @@ package it.unina.prisonmanager.dao;
 
 import java.util.Collection;
 
-public interface DataAccessObject<T, U>
+import it.unina.prisonmanager.model.Entity;
+
+public interface DataAccessObject<T extends Entity, U>
 {
 	boolean insert(T entity);
 	T findById(U id);

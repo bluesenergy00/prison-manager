@@ -17,10 +17,7 @@ public final class DBConnection
 	
 	static {
 		Properties properties = new Properties();
-		try (
-			InputStream credentials = DBConnection.class.getClassLoader()
-				.getResourceAsStream("db.properties")
-		) {
+		try (InputStream credentials = DBConnection.class.getClassLoader().getResourceAsStream("db.properties")) {
 			if (credentials == null) {
 				throw new RuntimeException("db.properties file not found!");
 			} properties.load(credentials);

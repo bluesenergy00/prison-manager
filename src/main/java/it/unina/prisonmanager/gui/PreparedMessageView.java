@@ -18,7 +18,7 @@ public interface PreparedMessageView extends MessageView
 	}
 	
 	@Override
-	default void showMessage(String message) {		
+	default void showMessage(String message) {
 		JOptionPane.showMessageDialog(
 			getParentComponent(), message, "Message",
 			JOptionPane.INFORMATION_MESSAGE
@@ -30,6 +30,14 @@ public interface PreparedMessageView extends MessageView
 		JOptionPane.showMessageDialog(
 			getParentComponent(), message, "Error",
 			JOptionPane.ERROR_MESSAGE
+		);
+	}
+	
+	@Override
+	default void showWarningMessage(String message) {
+		JOptionPane.showMessageDialog(
+			getParentComponent(), message, "Warning",
+			JOptionPane.WARNING_MESSAGE
 		);
 	}
 }

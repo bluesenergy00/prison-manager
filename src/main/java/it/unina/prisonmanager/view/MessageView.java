@@ -8,4 +8,5 @@ public interface MessageView
 	
 	void showMessage(String message);
 	void showErrorMessage(String message);
+	void showWarningMessage(String message);
 }

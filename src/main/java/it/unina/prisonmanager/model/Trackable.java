@@ -57,4 +57,10 @@ abstract public class Trackable implements Entity
 	}
 	
 	abstract public String getExtensionDetails();
+	
+	@Override
+	abstract public boolean equals(Object obj);
+	
+	@Override
+	abstract public int hashCode();
 }

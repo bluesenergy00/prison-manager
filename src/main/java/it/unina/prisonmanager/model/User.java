@@ -36,7 +36,7 @@ public class User extends Trackable
 	
 	private static String requireValidUsername(String username) {
 		Objects.requireNonNull(username, "Username is NULL.");
-		username = username.trim();
+		username = username.strip();
 		int i = username.length();
 		if (i < USERNAME_MINIMUM_LENGTH || i > USERNAME_MAXIMUM_LENGTH) {
 			throw new IllegalArgumentException(
