@@ -3,24 +3,23 @@ package it.unina.prisonmanager.controller;
 import it.unina.prisonmanager.dao.impl.UserDAOImpl;
 import it.unina.prisonmanager.gui.AccessFrame;
 import it.unina.prisonmanager.model.User;
+import it.unina.prisonmanager.view.AccessView;
 
 public class MainController
 {
-	private final UserDAOImpl userDAO = UserDAOImpl.getInstance();
-	
-	public void start() {
-		AccessFrame accessFrame = new AccessFrame();
-		AccessController accessController = new AccessController(this, userDAO, accessFrame);
-		boolean isOwner = userDAO.isEmpty();
-		accessFrame.setAccessFrame(accessController, isOwner);
-		if (isOwner) {
-			accessFrame.showRegistrationView();
-		} else {
-			accessFrame.showLoginView();
-		} accessFrame.setVisible(true);
+	public static AccessView getAccessView(
+		AccessController accessController, boolean isOwner
+	) {
+		return new AccessFrame(accessController, isOwner);
 	}
 	
-	public void goToDashboardView(User user) {
-		
+	public static void start() {
+		new AccessController(
+			UserDAOImpl.getInstance()
+		).openAccessView();
+	}
+	
+	public static void openDashboard(User user) {
+		System.out.println("\nDashboard Controller Loading ... ... ...");
 	}
 }

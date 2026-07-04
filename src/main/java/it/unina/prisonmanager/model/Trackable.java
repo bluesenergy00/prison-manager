@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-abstract public class Trackable implements Entity
+public abstract class Trackable implements Entity
 {
 	private Instant insertedAt;
 	private Instant updatedAt;
@@ -16,15 +16,15 @@ abstract public class Trackable implements Entity
 		setUpdateInstant(updatedAt);
 	}
 	
-	public void setUpdateInstant(Instant updatedAt) {
-		requireNonFuture(updatedAt, "Update instant cannot be in the future.");
-		this.updatedAt = truncateToSeconds(updatedAt);
-	}
-	
 	public void setInsertInstant(Instant insertedAt) {
 		Objects.requireNonNull(insertedAt, "Insert instant is NULL.");
 		requireNonFuture(insertedAt, "Insert instant cannot be in the future.");
 		this.insertedAt = truncateToSeconds(insertedAt);
+	}
+	
+	public void setUpdateInstant(Instant updatedAt) {
+		requireNonFuture(updatedAt, "Update instant cannot be in the future.");
+		this.updatedAt = truncateToSeconds(updatedAt);
 	}
 	
 	protected static Instant truncateToSeconds(Instant instant) {
@@ -50,17 +50,14 @@ abstract public class Trackable implements Entity
 	}
 	
 	@Override
-	public final String toString() {
-		return getExtensionDetails()
-			+ ", insertionInstant=" + insertedAt
-			+ ", updateInstant=" + updatedAt + "}";
+	public String toString() {
+		return ", insertedAt=" + insertedAt
+			+ ", updatedAt=" + updatedAt + "}";
 	}
 	
-	abstract public String getExtensionDetails();
+	@Override
+	public abstract boolean equals(Object obj);
 	
 	@Override
-	abstract public boolean equals(Object obj);
-	
-	@Override
-	abstract public int hashCode();
+	public abstract int hashCode();
 }

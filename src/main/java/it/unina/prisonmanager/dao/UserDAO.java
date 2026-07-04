@@ -8,5 +8,6 @@ import it.unina.prisonmanager.model.UserRole;
 public interface UserDAO extends DataAccessObject<User, Integer>
 {
 	User findByUsername(String username);
+	//User findByPersonalCode(String personalCode);
 	Collection<User> findByRole(UserRole role);
 }

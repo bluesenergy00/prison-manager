@@ -6,47 +6,47 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import it.unina.prisonmanager.dao.UserDAO;
 import it.unina.prisonmanager.exception.DataAccessException;
+import it.unina.prisonmanager.exception.DuplicateDataException;
 import it.unina.prisonmanager.model.User;
+import it.unina.prisonmanager.model.UserRole;
+import it.unina.prisonmanager.utility.Check;
 import it.unina.prisonmanager.view.AccessView;
 
 public class AccessController
 {
-	private final MainController mainController;
-	
 	private final UserDAO userDAO;
 	private final AccessView accessView;
+	
+	private final boolean isOwner;
 	
 	private static final int PASSWORD_MINIMUM_LENGTH = 8;
 	private static final int PASSWORD_MAXIMUM_LENGTH = 120;
 	
-	public AccessController(
-		MainController mainController, UserDAO userDAO, AccessView accessView
-	) {
-		this.mainController = Objects.requireNonNull(
-			mainController, "MainController reference is NULL."
-		);
+	public AccessController(UserDAO userDAO) {
 		this.userDAO = Objects.requireNonNull(
 			userDAO, "UserDAO reference is NULL."
 		);
-		this.accessView = Objects.requireNonNull(
-			accessView, "AccessView reference is NULL."
-		);
+		this.isOwner = userDAO.isEmpty();
+		this.accessView = MainController.getAccessView(this, isOwner);
 	}
 	
-	public void goToLoginView() {
+	public void openAccessView() {
+		if (!isOwner) {
+			openLoginView();
+			return;
+		} openRegistrationView();
+	}
+	
+	public void openLoginView() {
 		accessView.showLoginView();
-		//accessView.setTitle("LOGIN");
-		//accessView.show("LOGIN");
 	}
 	
-	public void goToRegistrationView() {
+	public void openRegistrationView() {
 		accessView.showRegistrationView();
-		//accessView.setTitle("REGISTRATION");
-		//accessView.show("REGISTRATION");
 	}
 	
 	public void handleLoginAttempt(String username, String password) {
-		if (username.isBlank() || password.isBlank()) {
+		if (username.isBlank() || password.isEmpty()) {
 			accessView.showMessage("Fill in all fields to login.");
 			return;
 		} try {
@@ -59,9 +59,9 @@ public class AccessController
 					"This user has been deactivated. Contact administrator."
 				);
 				return;
-			} accessView.showMessage("Success! " + username);
-			accessView.close();
-			mainController.goToDashboardView(user);
+			} accessView.showMessage("Welcome back, " + user.getUsername() + '.');
+			closeAccessView();
+			MainController.openDashboard(user);
 		} catch (DataAccessException e) {
 			e.printStackTrace();
 			accessView.showErrorMessage(e.getMessage());
@@ -71,12 +71,11 @@ public class AccessController
 	private static String requireValidPassword(String password) {
 		Objects.requireNonNull(password, "Password is NULL.");
 		int i = password.length();
-		if (i < PASSWORD_MINIMUM_LENGTH || i > PASSWORD_MAXIMUM_LENGTH) {
-			throw new IllegalArgumentException(
-				"Password needs to be between " + PASSWORD_MINIMUM_LENGTH
-				+ " and " + PASSWORD_MAXIMUM_LENGTH + " characters long."
-			);
-		} boolean hasLowercase = false;
+		Check.requireInRange(
+			i, PASSWORD_MINIMUM_LENGTH, PASSWORD_MAXIMUM_LENGTH, "Password needs to be between "
+			+ PASSWORD_MINIMUM_LENGTH + " and " + PASSWORD_MAXIMUM_LENGTH + " characters long."
+		);
+		boolean hasLowercase = false;
 		boolean hasUppercase = false;
 		boolean hasDigit = false;
 		while ((!hasLowercase || !hasUppercase || !hasDigit) && --i >= 0) {
@@ -95,11 +94,35 @@ public class AccessController
 		} return password;
 	}
 	
-	public void handleRegistrationAttempt(
-		String firstName, String lastName, String personalCode, boolean isProvisional,
-		String nationality, String username, String password, String confirmedPassword
-	) {
-		
+	public void handleRegistrationAttempt(String username, String[] password) {
+		if (username.isBlank() || password[0].isEmpty() || password[1].isEmpty()) {
+			accessView.showMessage("Fill in all fields to sign up.");
+			return;
+		} if (!password[0].equals(password[1])) {
+			accessView.showErrorMessage("Passwords do not match. Try again.");
+			return;
+		} try {
+			User user = new User();
+			user.setUsername(username);
+			user.setPasswordHash(
+				BCrypt.hashpw(
+					requireValidPassword(password[0]),
+					BCrypt.gensalt()
+				)
+			);
+			user.setRole(isOwner ? UserRole.OWNER : UserRole.APPENDED);
+			user.setActivityStatus(isOwner);
+			userDAO.insert(user);
+			accessView.showMessage("Welcome, " + user.getUsername() + '.');
+			closeAccessView();
+			MainController.openDashboard(user);
+		} catch (DuplicateDataException e) {
+			e.printStackTrace();
+			accessView.showMessage("This username already exists.");
+		} catch (IllegalArgumentException | DataAccessException e) {
+			e.printStackTrace();
+			accessView.showErrorMessage(e.getMessage());
+		}
 	}
 	
 	public void closeAccessView() {

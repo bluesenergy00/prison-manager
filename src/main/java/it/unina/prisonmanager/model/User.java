@@ -3,16 +3,20 @@ package it.unina.prisonmanager.model;
 import java.time.Instant;
 import java.util.Objects;
 
+import it.unina.prisonmanager.utility.Check;
+
 public class User extends Trackable
 {
-	private static final int USERNAME_MINIMUM_LENGTH = 3;
-	private static final int USERNAME_MAXIMUM_LENGTH = 15;
-	
 	private int id;
 	private String username;
 	private String passwordHash;
 	private UserRole role;
 	private boolean isActive;
+	
+	//private Person personalDetails;
+	
+	private static final int USERNAME_MINIMUM_LENGTH = 3;
+	private static final int USERNAME_MAXIMUM_LENGTH = 15;
 	
 	public User() {}
 	
@@ -26,24 +30,23 @@ public class User extends Trackable
 		setPasswordHash(passwordHash);
 		setRole(role);
 		setActivityStatus(isActive);
+		//setPersonalDetails(personalDetails);
 	}
 	
+	@Override
 	public void setId(int id) {
-		if (id <= 0) {
-			throw new IllegalArgumentException("User ID can only be positive.");
-		} this.id = id;
+		this.id = Entity.requirePositiveId(id, "User ID can only be positive.");
 	}
 	
 	private static String requireValidUsername(String username) {
 		Objects.requireNonNull(username, "Username is NULL.");
 		username = username.strip();
 		int i = username.length();
-		if (i < USERNAME_MINIMUM_LENGTH || i > USERNAME_MAXIMUM_LENGTH) {
-			throw new IllegalArgumentException(
-				"Username needs to be between " + USERNAME_MINIMUM_LENGTH
-				+ " and " + USERNAME_MAXIMUM_LENGTH + " characters long."
-			);
-		} username = username.toLowerCase();
+		Check.requireInRange(
+			i, USERNAME_MINIMUM_LENGTH, USERNAME_MAXIMUM_LENGTH, "Username needs to be between "
+			+ USERNAME_MINIMUM_LENGTH + " and " + USERNAME_MAXIMUM_LENGTH + " characters long."
+		);
+		username = username.toLowerCase();
 		boolean hasLowerCaseASCII = false;
 		while (--i >= 0) {
 			char c = username.charAt(i);
@@ -66,10 +69,9 @@ public class User extends Trackable
 	}
 	
 	public void setPasswordHash(String passwordHash) {
-		Objects.requireNonNull(passwordHash, "Password hash is NULL.");
-		if (passwordHash.isBlank()) {
-			throw new IllegalArgumentException("Password hash is blank.");
-		} this.passwordHash = passwordHash;
+		this.passwordHash = Check.requireNonVoid(
+			passwordHash, "Password hash is blank/NULL."
+		);
 	}
 	
 	public void setRole(UserRole role) {
@@ -80,6 +82,13 @@ public class User extends Trackable
 		this.isActive = isActive;
 	}
 	
+	/*public void setPersonalDetails(Person personalDetails) {
+		this.personalDetails = Objects.requireNonNull(
+			personalDetails, "Person reference is NULL."
+		);
+	}*/
+	
+	@Override
 	public int getId() {
 		return this.id;
 	}
@@ -100,19 +109,24 @@ public class User extends Trackable
 		return this.isActive;
 	}
 	
+	/*public Person getPerson() {
+		return personalDetails;
+	}*/
+	
 	@Override
-	public String getExtensionDetails() {
+	public String toString() {
 		return "User {id=" + this.id
 			+ ", username='" + this.username
 			+ "\', role='" + this.role
-			+ "\', isActive=" + this.isActive;
+			+ "\', isActive=" + this.isActive
+			+ super.toString();
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
-		} if (obj == null || getClass() != obj.getClass()) {
+		} if (!isThisClass(obj)) {
 			return false;
 		} User tmp = (User) obj;
 		return Objects.equals(this.username, tmp.username);
