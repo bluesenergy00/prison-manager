@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.mindrot.jbcrypt.BCrypt;
 
 import it.unina.prisonmanager.dao.UserDAO;
+import it.unina.prisonmanager.db.DBConnection;
 import it.unina.prisonmanager.exception.DataAccessException;
 import it.unina.prisonmanager.exception.DuplicateDataException;
 import it.unina.prisonmanager.model.User;
@@ -32,16 +33,16 @@ public class AccessController
 	
 	public void openAccessView() {
 		if (!isOwner) {
-			openLoginView();
+			goToLoginView();
 			return;
-		} openRegistrationView();
+		} goToRegistrationView();
 	}
 	
-	public void openLoginView() {
+	public void goToLoginView() {
 		accessView.showLoginView();
 	}
 	
-	public void openRegistrationView() {
+	public void goToRegistrationView() {
 		accessView.showRegistrationView();
 	}
 	
@@ -50,19 +51,27 @@ public class AccessController
 			accessView.showMessage("Fill in all fields to login.");
 			return;
 		} try {
+			DBConnection.getInstance().startTransaction(null);
 			User user = userDAO.findByUsername(username);
-			if (user == null || BCrypt.checkpw(password, user.getPasswordHash())) {
+			DBConnection.getInstance().commitTransaction();
+			if (user == null || !BCrypt.checkpw(password, user.getPasswordHash())) {
 				accessView.showErrorMessage("Invalid credentials. Try again.");
 				return;
 			} if (!user.isActive()) {
-				accessView.showMessage(
+				if (user.getRole() == UserRole.APPENDED) {
+					accessView.showMessage(
+						"This user is currently waiting to be accepted. Try again later."
+					);
+					return;
+				} accessView.showMessage(
 					"This user has been deactivated. Contact administrator."
 				);
 				return;
 			} accessView.showMessage("Welcome back, " + user.getUsername() + '.');
 			closeAccessView();
-			MainController.openDashboard(user);
+			MainController.operateDashboard(user);
 		} catch (DataAccessException e) {
+			DBConnection.getInstance().rollbackTransaction();
 			e.printStackTrace();
 			accessView.showErrorMessage(e.getMessage());
 		}
@@ -113,9 +122,15 @@ public class AccessController
 			user.setRole(isOwner ? UserRole.OWNER : UserRole.APPENDED);
 			user.setActivityStatus(isOwner);
 			userDAO.insert(user);
-			accessView.showMessage("Welcome, " + user.getUsername() + '.');
-			closeAccessView();
-			MainController.openDashboard(user);
+			if (!isOwner) {
+				accessView.showMessage(
+					"Thank you, " + user.getUsername()
+					+ ". The registration has been submitted."
+				);
+				goToLoginView();
+				return;
+			} closeAccessView();
+			MainController.operateDashboard(user);
 		} catch (DuplicateDataException e) {
 			e.printStackTrace();
 			accessView.showMessage("This username already exists.");

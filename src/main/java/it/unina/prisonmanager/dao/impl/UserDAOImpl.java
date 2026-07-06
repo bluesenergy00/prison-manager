@@ -5,7 +5,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collection;
 
 import it.unina.prisonmanager.dao.UserDAO;
@@ -15,7 +14,7 @@ import it.unina.prisonmanager.model.UserRole;
 
 public class UserDAOImpl extends AbstractDAO<User> implements UserDAO
 {
-	private static UserDAOImpl instance;
+	private static final UserDAOImpl instance = new UserDAOImpl();
 	
 	private UserDAOImpl() {
 		super(
@@ -31,9 +30,7 @@ public class UserDAOImpl extends AbstractDAO<User> implements UserDAO
 	}
 	
 	public static UserDAOImpl getInstance() {
-		if (instance == null) {
-			instance = new UserDAOImpl();
-		} return instance;
+		return instance;
 	}
 	
 	@Override
@@ -78,7 +75,7 @@ public class UserDAOImpl extends AbstractDAO<User> implements UserDAO
 	@Override
 	public User findByUsername(String username) {
 		try {
-			Connection connection = DBConnection.getInstance().getConnection();
+			Connection connection = DBConnection.getInstance().getActiveConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(
 					"SELECT * FROM frontend_user WHERE username = ?"
@@ -88,8 +85,8 @@ public class UserDAOImpl extends AbstractDAO<User> implements UserDAO
 				return find(prepared);
 			}
 		} catch (SQLException e) {
-			dispatchSQLException(e);
-		} return null;
+			throw dispatchSQLException(e);
+		}
 	}
 
 	/*@Override
@@ -113,7 +110,7 @@ public class UserDAOImpl extends AbstractDAO<User> implements UserDAO
 	@Override
 	public Collection<User> findByRole(UserRole role) {
 		try {
-			Connection connection = DBConnection.getInstance().getConnection();
+			Connection connection = DBConnection.getInstance().getActiveConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(
 					"SELECT * FROM frontend_user WHERE role = ?::user_role"
@@ -123,7 +120,7 @@ public class UserDAOImpl extends AbstractDAO<User> implements UserDAO
 				return getCollection(prepared);
 			}
 		} catch (SQLException e) {
-			dispatchSQLException(e);
-		} return new ArrayList<>();
+			throw dispatchSQLException(e);
+		}
 	}
 }

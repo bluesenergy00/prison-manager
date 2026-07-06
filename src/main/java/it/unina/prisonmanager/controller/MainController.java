@@ -19,7 +19,7 @@ public class MainController
 		).openAccessView();
 	}
 	
-	public static void openDashboard(User user) {
+	public static void operateDashboard(User user) {
 		System.out.println("\nDashboard Controller Loading ... ... ...");
 	}
 }

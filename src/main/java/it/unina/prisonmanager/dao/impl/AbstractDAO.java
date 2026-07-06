@@ -18,7 +18,7 @@ import it.unina.prisonmanager.model.Entity;
 
 public abstract class AbstractDAO<T extends Entity>
 implements DataAccessObject<T, Integer>
-{
+{	
 	private String insert;
 	private String select;
 	private String update;
@@ -38,22 +38,22 @@ implements DataAccessObject<T, Integer>
 		this.booleanStatement = booleanStatement;
 	}
 	
-	protected static void dispatchSQLException(SQLException e) {
+	protected static DataAccessException dispatchSQLException(SQLException e) {
 		Objects.requireNonNull(e, "SQLException reference is NULL.");
 		String state = e.getSQLState();
 		if (state == null) {
-			throw new DataAccessException(
+			return new DataAccessException(
 				"Communication with data source has failed."
 				+ " Check your connection and try again.", e
 			);
 		} switch(state) {
 			case "23001":
 			case "23503":
-				throw new DataDependencyException(e);
+				return new DataDependencyException(e);
 			case "23505":
-				throw new DuplicateDataException(e);
+				return new DuplicateDataException(e);
 			default:
-				throw new DataAccessException(e);
+				return new DataAccessException(e);
 		}
 	}
 	
@@ -87,7 +87,7 @@ implements DataAccessObject<T, Integer>
 	@Override
 	public boolean insert(T entity) {
 		try {
-			Connection connection = DBConnection.getInstance().getConnection();
+			Connection connection = DBConnection.getInstance().getActiveConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(
 					insert, Statement.RETURN_GENERATED_KEYS
@@ -103,65 +103,65 @@ implements DataAccessObject<T, Integer>
 				}
 			}
 		} catch (SQLException e) {
-			dispatchSQLException(e);
+			throw dispatchSQLException(e);
 		} return false;
 	}
 	
 	@Override
 	public T findById(Integer id) {
 		try {
-			Connection connection = DBConnection.getInstance().getConnection();
+			Connection connection = DBConnection.getInstance().getActiveConnection();
 			try (PreparedStatement prepared = connection.prepareStatement(select)) {
 				prepared.setInt(1, id);
 				return find(prepared);
 			}
 		} catch (SQLException e) {
-			dispatchSQLException(e);
-		} return null;
+			throw dispatchSQLException(e);
+		}
 	}
 
 	@Override
 	public boolean update(T entity) {
 		try {
-			Connection connection = DBConnection.getInstance().getConnection();
+			Connection connection = DBConnection.getInstance().getActiveConnection();
 			try (PreparedStatement prepared = connection.prepareStatement(update)) {
 				setupUpdate(prepared, entity);
 				return (prepared.executeUpdate() > 0);
 			}
 		} catch (SQLException e) {
-			dispatchSQLException(e);
-		} return false;
+			throw dispatchSQLException(e);
+		}
 	}
 	
 	@Override
 	public boolean delete(Integer id) {
 		try {
-			Connection connection = DBConnection.getInstance().getConnection();
+			Connection connection = DBConnection.getInstance().getActiveConnection();
 			try (PreparedStatement prepared = connection.prepareStatement(delete)) {
 				prepared.setInt(1, id);
 				return (prepared.executeUpdate() > 0);
 			}
 		} catch (SQLException e) {
-			dispatchSQLException(e);
-		} return false;
+			throw dispatchSQLException(e);
+		}
 	}
 	
 	@Override
 	public Collection<T> getAll() {
 		try {
-			Connection connection = DBConnection.getInstance().getConnection();
+			Connection connection = DBConnection.getInstance().getActiveConnection();
 			try (PreparedStatement prepared = connection.prepareStatement(selectAll)) {
 				return getCollection(prepared);
 			}
 		} catch (SQLException e) {
-			dispatchSQLException(e);
-		} return new ArrayList<>();
+			throw dispatchSQLException(e);
+		}
 	}
 	
 	@Override
 	public boolean isEmpty() {
 		try {
-			Connection connection = DBConnection.getInstance().getConnection();
+			Connection connection = DBConnection.getInstance().getActiveConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(booleanStatement);
 				ResultSet result = prepared.executeQuery()
@@ -169,7 +169,7 @@ implements DataAccessObject<T, Integer>
 				return !(result.next());
 			}
 		} catch (SQLException e) {
-			dispatchSQLException(e);
-		} return false;
+			throw dispatchSQLException(e);
+		}
 	}
 }

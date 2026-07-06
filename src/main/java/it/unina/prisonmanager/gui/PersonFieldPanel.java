@@ -3,7 +3,6 @@ package it.unina.prisonmanager.gui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.util.Locale;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -22,7 +21,9 @@ public class PersonFieldPanel extends JPanel
 	protected final JSpinner dateSpinner = new JSpinner(new SpinnerDateModel());
 	protected final JTextField personalCodeField = new JTextField();
 	protected final JCheckBox isProvisionalCode = new JCheckBox("Provisional");
-	protected final JComboBox<String> nationalityComboBox = new JComboBox<>(Locale.getISOCountries());
+	protected final JComboBox<String> nationalityComboBox = new JComboBox<>(
+		new String[]{"Italy", "Germany", "Great Britain", "Mexico", "Spain", "United States"}
+	);
 	
 	public PersonFieldPanel() {
 		setLayout(new GridBagLayout());

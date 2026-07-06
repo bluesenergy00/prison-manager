@@ -35,7 +35,7 @@ public class LoginPanel extends JPanel
 		);
 		newAccountButton.addActionListener(
 			_ -> {
-				accessController.openRegistrationView();
+				accessController.goToRegistrationView();
 			}
 		);
 		exitButton.addActionListener(

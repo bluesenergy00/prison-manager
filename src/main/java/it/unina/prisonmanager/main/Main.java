@@ -4,8 +4,6 @@ import javax.swing.SwingUtilities;
 
 import it.unina.prisonmanager.controller.MainController;
 
-//import it.unina.prisonmanager.gui.WelcomeFrame;
-
 public class Main
 {
 	//username -> "bububaba"

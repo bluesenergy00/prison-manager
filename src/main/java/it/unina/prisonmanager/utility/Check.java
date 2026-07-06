@@ -3,8 +3,14 @@ package it.unina.prisonmanager.utility;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public interface Check
+public final class Check
 {
+	private Check() {
+		throw new UnsupportedOperationException(
+			"it.unina.prisonmanager.utility.Check is a static class."
+		);
+	}
+	
 	public static double requireInRange(
 		double value, double min, double max
 	) {

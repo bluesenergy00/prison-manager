@@ -36,7 +36,7 @@ public abstract class Trackable implements Entity
 	}
 	
 	protected static Instant requireNonFuture(Instant instant, String message) {
-		if (instant != null && instant.isAfter(Instant.now())) {
+		if (instant != null && instant.isAfter(Instant.now().plusSeconds(10))) {
 			throw new IllegalArgumentException(message);
 		} return instant;
 	}

@@ -54,12 +54,12 @@ public class User extends Trackable
 				hasLowerCaseASCII = true;
 			} else if (c < '0' || c > '9') {
 				throw new IllegalArgumentException(
-					"Username can only contain A-Z letters and digits, no spaces."
+					"Username can only contain alphabetic letters and digits, no spaces."
 				);
 			}
 		} if (!hasLowerCaseASCII) {
 			throw new IllegalArgumentException(
-				"Username needs to contain at least one A-Z letter."
+				"Username needs to contain at least one alphabetic letter."
 			);
 		} return username;
 	}

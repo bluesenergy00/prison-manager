@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import it.unina.prisonmanager.exception.DataAccessException;
+
 public final class DBConnection
 {
-	private static DBConnection instance;
+	private static final DBConnection instance = new DBConnection();
 	
 	private static final String URL;
 	private static final String USER;
@@ -32,19 +35,73 @@ public final class DBConnection
 		}
 	}
 	
-	private Connection connection;
+	private final ThreadLocal<Connection> localConnection = new ThreadLocal<>();
 	
 	private DBConnection() {}
 	
-	public static synchronized DBConnection getInstance() {
-		if (instance == null) {
-			instance = new DBConnection();
-		} return instance;
+	public static DBConnection getInstance() {
+		return instance;
 	}
 	
-	public Connection getConnection() throws SQLException {
-		if (connection == null || connection.isClosed()) {
-			connection = DriverManager.getConnection(URL, USER, PASSWORD);
+	//Controller starts transaction for specific user
+	public Connection startTransaction(Integer userId) {
+		Connection connection = localConnection.get();
+		try {
+			if (connection == null || connection.isClosed()) {
+				connection = DriverManager.getConnection(URL, USER, PASSWORD);
+				connection.setAutoCommit(false);
+				localConnection.set(connection);
+			} if (userId != null) {
+				try (
+					PreparedStatement prepared = connection.prepareStatement(
+						"SET LOCAL frontend.current_user_id = ?"
+					)
+				) {
+					prepared.setInt(1, userId);
+					prepared.execute();
+				}
+			} 
+		} catch (SQLException e) {
+			throw new DataAccessException("Unknown failure on transaction start.");
 		} return connection;
+	}
+	
+	//DAO gets connection activated by Controller transaction
+	public Connection getActiveConnection() {
+		Connection connection = localConnection.get();
+		if (connection == null) {
+			throw new IllegalStateException(
+				"Tried to receive a connection without starting a transaction first."
+			);
+		} return connection;
+	}
+	
+	//true for commit, false for rollback
+	public void endTransaction(boolean isCommit) {
+		Connection connection = localConnection.get();
+		if (connection == null) {
+			return;
+		} try {
+			if (!connection.isClosed()) {
+				if (isCommit) {
+					connection.commit();
+				} else {
+					connection.rollback();
+				} connection.close();
+			}
+		} catch(SQLException e) {
+			String endOp = (isCommit) ? "commit" : "rollback ";
+			throw new DataAccessException("Failed to " + endOp + " transaction.");
+		} finally {
+			localConnection.remove();
+		}
+	}
+	
+	public void commitTransaction() {
+		endTransaction(true);
+	}
+	
+	public void rollbackTransaction() {
+		endTransaction(false);
 	}
 }

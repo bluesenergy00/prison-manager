@@ -46,14 +46,14 @@ public class RegistrationPanel extends JPanel
 				if (isOwner) {
 					accessController.closeAccessView();
 				} else {
-					accessController.openLoginView();
+					accessController.goToLoginView();
 				}
 			}
 		);
 		setLayout(new BorderLayout(10, 10));
 		setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		JPanel userFieldPanel = new JPanel(new GridBagLayout());
-		userFieldPanel.setBorder(BorderFactory.createEmptyBorder(0, 90, 0, 90));
+		userFieldPanel.setBorder(BorderFactory.createEmptyBorder(0, 67, 0, 67));
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.insets = new Insets(6, 6, 6, 6);
 		gbc.gridx = 0;

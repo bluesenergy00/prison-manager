@@ -14,7 +14,7 @@ import it.unina.prisonmanager.model.Person;
 
 public class PersonDAOImpl extends AbstractDAO<Person> implements PersonDAO
 {
-	private static PersonDAOImpl instance;
+	private static final PersonDAOImpl instance = new PersonDAOImpl();
 	
 	private PersonDAOImpl() {
 		super(
@@ -28,9 +28,7 @@ public class PersonDAOImpl extends AbstractDAO<Person> implements PersonDAO
 	}
 	
 	public static PersonDAOImpl getInstance() {
-		if (instance == null) {
-			instance = new PersonDAOImpl();
-		} return instance;
+		return instance;
 	}
 
 	@Override
@@ -80,7 +78,7 @@ public class PersonDAOImpl extends AbstractDAO<Person> implements PersonDAO
 	public Person findByPersonalCode(String personalCode) {
 		Objects.requireNonNull(personalCode, "Personal code is NULL.");
 		try {
-			Connection connection = DBConnection.getInstance().getConnection();
+			Connection connection = DBConnection.getInstance().getActiveConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(
 					"SELECT * FROM person WHERE personal_code = ?"
@@ -90,8 +88,8 @@ public class PersonDAOImpl extends AbstractDAO<Person> implements PersonDAO
 				return find(prepared);
 			}
 		} catch (SQLException e) {
-			dispatchSQLException(e);
-		} return null;
+			throw dispatchSQLException(e);
+		}
 	}
 
 	/*@Override
