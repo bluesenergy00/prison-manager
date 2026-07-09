@@ -7,12 +7,18 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-public interface ScaledImageLoader
+public final class ScaledImageLoader
 {
-	default ImageIcon loadScaledImageIcon(
+	private ScaledImageLoader() {
+		throw new UnsupportedOperationException(
+			"it.unina.prisonmanager.utility.ScaledImageLoader is a static class."
+		);
+	}
+	
+	public static ImageIcon loadScaledImageIcon(
 		String resourcePath, int width, int height
 	) {
-		URL imagePath = getClass().getResource(resourcePath);
+		URL imagePath = ScaledImageLoader.class.getResource(resourcePath);
 		if (imagePath != null) {
 			try {
 				return new ImageIcon(
@@ -20,9 +26,7 @@ public interface ScaledImageLoader
 						width, height, Image.SCALE_SMOOTH
 					)
 				);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			} catch (IOException e) {e.printStackTrace();}
 		} return new ImageIcon();
 	}
 }

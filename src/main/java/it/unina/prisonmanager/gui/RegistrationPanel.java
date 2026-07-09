@@ -34,9 +34,9 @@ public class RegistrationPanel extends JPanel
 			_ -> {
 				accessController.handleRegistrationAttempt(
 					usernameField.getText().strip(),
-					new String[] {
-						new String(passwordField[0].getPassword()),
-						new String(passwordField[1].getPassword())
+					new char[][] {
+						passwordField[0].getPassword(),
+						passwordField[1].getPassword()
 					}
 				);
 			}
@@ -44,7 +44,7 @@ public class RegistrationPanel extends JPanel
 		leaveButton.addActionListener(
 			_ -> {
 				if (isOwner) {
-					accessController.closeAccessView();
+					accessController.closeView();
 				} else {
 					accessController.goToLoginView();
 				}

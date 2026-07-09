@@ -12,8 +12,7 @@ import it.unina.prisonmanager.controller.AccessController;
 import it.unina.prisonmanager.utility.ScaledImageLoader;
 import it.unina.prisonmanager.view.AccessView;
 
-public class AccessFrame extends JFrame
-implements AccessView, PreparedMessageView, ScaledImageLoader
+public class AccessFrame extends JFrame implements AccessView, PreparedMessageView
 {
 	private static final long serialVersionUID = 1L;
 	
@@ -22,8 +21,9 @@ implements AccessView, PreparedMessageView, ScaledImageLoader
 	
 	private static final String LOGIN_PANEL_NAME = "Login";
 	private static final String REGISTRATION_PANEL_NAME = "Registration";
+	private static final String WELCOME_PANEL_NAME = "Welcome";
 	
-	public AccessFrame(
+	public void setAccessFrame(
 		AccessController accessController, boolean isOwner
 	) {
 		//Set Access Controller
@@ -38,7 +38,9 @@ implements AccessView, PreparedMessageView, ScaledImageLoader
 		setResizable(false);
 		setLayout(new BorderLayout(10, 10));
 		JLabel logoLabel = new JLabel(
-			loadScaledImageIcon("/PrisonManagerLogo.png", 550, 400)
+			ScaledImageLoader.loadScaledImageIcon(
+				"/PrisonManagerLogo.png", 550, 400
+			)
 		);
 		add(logoLabel, BorderLayout.NORTH);
 		if (!isOwner) {
@@ -47,7 +49,7 @@ implements AccessView, PreparedMessageView, ScaledImageLoader
 			);
 		} containerPanel.add(
 			new RegistrationPanel(accessController, isOwner),
-			REGISTRATION_PANEL_NAME
+			(isOwner) ? WELCOME_PANEL_NAME : REGISTRATION_PANEL_NAME
 		);
 		add(containerPanel, BorderLayout.CENTER);
 	}
@@ -64,8 +66,8 @@ implements AccessView, PreparedMessageView, ScaledImageLoader
 	}
 
 	@Override
-	public void showRegistrationView() {
-		show(REGISTRATION_PANEL_NAME);
+	public void showRegistrationView(boolean isOwner) {
+		show((isOwner) ? WELCOME_PANEL_NAME : REGISTRATION_PANEL_NAME);
 	}
 
 	@Override

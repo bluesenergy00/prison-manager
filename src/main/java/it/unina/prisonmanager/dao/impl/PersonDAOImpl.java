@@ -78,7 +78,7 @@ public class PersonDAOImpl extends AbstractDAO<Person> implements PersonDAO
 	public Person findByPersonalCode(String personalCode) {
 		Objects.requireNonNull(personalCode, "Personal code is NULL.");
 		try {
-			Connection connection = DBConnection.getInstance().getActiveConnection();
+			Connection connection = DBConnection.getInstance().getConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(
 					"SELECT * FROM person WHERE personal_code = ?"

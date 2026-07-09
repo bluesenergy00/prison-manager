@@ -75,7 +75,7 @@ public class UserDAOImpl extends AbstractDAO<User> implements UserDAO
 	@Override
 	public User findByUsername(String username) {
 		try {
-			Connection connection = DBConnection.getInstance().getActiveConnection();
+			Connection connection = DBConnection.getInstance().getConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(
 					"SELECT * FROM frontend_user WHERE username = ?"
@@ -110,7 +110,7 @@ public class UserDAOImpl extends AbstractDAO<User> implements UserDAO
 	@Override
 	public Collection<User> findByRole(UserRole role) {
 		try {
-			Connection connection = DBConnection.getInstance().getActiveConnection();
+			Connection connection = DBConnection.getInstance().getConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(
 					"SELECT * FROM frontend_user WHERE role = ?::user_role"

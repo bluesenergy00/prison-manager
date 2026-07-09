@@ -87,7 +87,7 @@ implements DataAccessObject<T, Integer>
 	@Override
 	public boolean insert(T entity) {
 		try {
-			Connection connection = DBConnection.getInstance().getActiveConnection();
+			Connection connection = DBConnection.getInstance().getConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(
 					insert, Statement.RETURN_GENERATED_KEYS
@@ -110,7 +110,7 @@ implements DataAccessObject<T, Integer>
 	@Override
 	public T findById(Integer id) {
 		try {
-			Connection connection = DBConnection.getInstance().getActiveConnection();
+			Connection connection = DBConnection.getInstance().getConnection();
 			try (PreparedStatement prepared = connection.prepareStatement(select)) {
 				prepared.setInt(1, id);
 				return find(prepared);
@@ -123,7 +123,7 @@ implements DataAccessObject<T, Integer>
 	@Override
 	public boolean update(T entity) {
 		try {
-			Connection connection = DBConnection.getInstance().getActiveConnection();
+			Connection connection = DBConnection.getInstance().getConnection();
 			try (PreparedStatement prepared = connection.prepareStatement(update)) {
 				setupUpdate(prepared, entity);
 				return (prepared.executeUpdate() > 0);
@@ -136,7 +136,7 @@ implements DataAccessObject<T, Integer>
 	@Override
 	public boolean delete(Integer id) {
 		try {
-			Connection connection = DBConnection.getInstance().getActiveConnection();
+			Connection connection = DBConnection.getInstance().getConnection();
 			try (PreparedStatement prepared = connection.prepareStatement(delete)) {
 				prepared.setInt(1, id);
 				return (prepared.executeUpdate() > 0);
@@ -149,7 +149,7 @@ implements DataAccessObject<T, Integer>
 	@Override
 	public Collection<T> getAll() {
 		try {
-			Connection connection = DBConnection.getInstance().getActiveConnection();
+			Connection connection = DBConnection.getInstance().getConnection();
 			try (PreparedStatement prepared = connection.prepareStatement(selectAll)) {
 				return getCollection(prepared);
 			}
@@ -161,7 +161,7 @@ implements DataAccessObject<T, Integer>
 	@Override
 	public boolean isEmpty() {
 		try {
-			Connection connection = DBConnection.getInstance().getActiveConnection();
+			Connection connection = DBConnection.getInstance().getConnection();
 			try (
 				PreparedStatement prepared = connection.prepareStatement(booleanStatement);
 				ResultSet result = prepared.executeQuery()

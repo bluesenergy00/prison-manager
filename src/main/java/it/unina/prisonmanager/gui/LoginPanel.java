@@ -29,7 +29,7 @@ public class LoginPanel extends JPanel
 			_ -> {
 				accessController.handleLoginAttempt(
 					usernameField.getText().strip(),
-					new String(passwordField.getPassword())
+					passwordField.getPassword()
 				);
 			}
 		);
@@ -40,7 +40,7 @@ public class LoginPanel extends JPanel
 		);
 		exitButton.addActionListener(
 			_ -> {
-				accessController.closeAccessView();
+				accessController.closeView();
 			}
 		);
 		

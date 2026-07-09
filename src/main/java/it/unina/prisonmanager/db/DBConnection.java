@@ -14,13 +14,18 @@ public final class DBConnection
 {
 	private static final DBConnection instance = new DBConnection();
 	
+	public static DBConnection getInstance() {
+		return instance;
+	}
+	
 	private static final String URL;
 	private static final String USER;
 	private static final String PASSWORD;
 	
 	static {
 		Properties properties = new Properties();
-		try (InputStream credentials = DBConnection.class.getClassLoader().getResourceAsStream("db.properties")) {
+		try (InputStream credentials =
+				DBConnection.class.getClassLoader().getResourceAsStream("db.properties")) {
 			if (credentials == null) {
 				throw new RuntimeException("db.properties file not found!");
 			} properties.load(credentials);
@@ -38,10 +43,6 @@ public final class DBConnection
 	private final ThreadLocal<Connection> localConnection = new ThreadLocal<>();
 	
 	private DBConnection() {}
-	
-	public static DBConnection getInstance() {
-		return instance;
-	}
 	
 	//Controller starts transaction for specific user
 	public Connection startTransaction(Integer userId) {
@@ -62,16 +63,19 @@ public final class DBConnection
 				}
 			} 
 		} catch (SQLException e) {
-			throw new DataAccessException("Unknown failure on transaction start.");
+			throw new DataAccessException(
+				"Data access failure on transaction start.", e
+			);
 		} return connection;
 	}
 	
 	//DAO gets connection activated by Controller transaction
-	public Connection getActiveConnection() {
+	public Connection getConnection() {
 		Connection connection = localConnection.get();
 		if (connection == null) {
 			throw new IllegalStateException(
-				"Tried to receive a connection without starting a transaction first."
+				"Tried to receive a connection"
+				+ " without starting a transaction first."
 			);
 		} return connection;
 	}
@@ -91,17 +95,11 @@ public final class DBConnection
 			}
 		} catch(SQLException e) {
 			String endOp = (isCommit) ? "commit" : "rollback ";
-			throw new DataAccessException("Failed to " + endOp + " transaction.");
+			throw new DataAccessException(
+				"Failed to " + endOp + " transaction.", e
+			);
 		} finally {
 			localConnection.remove();
 		}
-	}
-	
-	public void commitTransaction() {
-		endTransaction(true);
-	}
-	
-	public void rollbackTransaction() {
-		endTransaction(false);
 	}
 }
